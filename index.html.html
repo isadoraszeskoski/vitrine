@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vitrine — Mostra dos IFAs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14141c;
+    --ink-soft:#4a4a56;
+    --paper:#faf7ef;
+    --paper-dim:#f0ead9;
+    --card:#ffffff;
+    --line: rgba(20,20,28,.14);
+
+    --ifa1:#e8536b;   /* IFA LGG/CHS */
+    --ifa1-bg:#fdeaee;
+    --ifa2:#3b7fc4;   /* IFA MAT/CNT */
+    --ifa2-bg:#e9f1fb;
+    --nat:#2e9e6b;    /* cor de apoio (status, confirmações) */
+    --nat-bg:#e6f6ee;
+
+    --radius: 16px;
+    --shadow: 0 10px 30px -12px rgba(20,20,28,.25);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Space Grotesk',sans-serif;
+    margin:0;
+    line-height:1.1;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'Space Mono',monospace; letter-spacing:.02em;}
+  p{line-height:1.6; color:var(--ink-soft);}
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  button{font-family:inherit; cursor:pointer;}
+
+  .wrap{max-width:1160px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- HEADER ---------- */
+  .site-header{
+    position:sticky; top:0; z-index:50;
+    background:var(--ink);
+    color:var(--paper);
+    border-bottom:3px dashed rgba(250,247,239,.25);
+  }
+  .nav-inner{
+    max-width:1160px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .logo{display:flex; align-items:center; gap:10px; cursor:pointer;}
+  .logo-badge{
+    width:38px; height:38px; border-radius:50%;
+    background:conic-gradient(var(--ifa1) 0 180deg, var(--ifa2) 180deg 360deg);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: inset 0 0 0 3px var(--ink);
+  }
+  .logo-text{font-family:'Space Grotesk'; font-weight:700; font-size:1.35rem;}
+  .logo-text span{color:var(--hum);}
+  .logo-sub{font-family:'Space Mono'; font-size:.65rem; opacity:.65; letter-spacing:.08em; text-transform:uppercase; margin-top:-2px;}
+
+  .nav-links{display:flex; gap:6px; align-items:center;}
+  .nav-links button{
+    background:none; border:none; color:var(--paper);
+    font-size:.92rem; font-weight:500; padding:9px 14px;
+    border-radius:999px; opacity:.75; transition:.2s;
+  }
+  .nav-links button.active, .nav-links button:hover{opacity:1; background:rgba(250,247,239,.1);}
+  .nav-cta{
+    background:var(--hum) !important; color:var(--ink) !important; opacity:1 !important;
+    font-weight:700 !important;
+  }
+  .nav-cta:hover{filter:brightness(1.08);}
+  .burger{display:none; background:none; border:none; color:var(--paper); font-size:1.5rem;}
+
+  @media (max-width:820px){
+    .nav-links{
+      position:fixed; inset:64px 0 auto 0; background:var(--ink);
+      flex-direction:column; align-items:stretch; padding:10px 20px 20px;
+      transform:translateY(-120%); transition:transform .25s ease;
+      border-bottom:3px dashed rgba(250,247,239,.25);
+    }
+    .nav-links.open{transform:translateY(0);}
+    .nav-links button{text-align:left; padding:12px 14px;}
+    .burger{display:block;}
+  }
+
+  /* ---------- PAGES ---------- */
+  .page{display:none; animation:fadeUp .5s ease both;}
+  .page.active{display:block;}
+  @keyframes fadeUp{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+  @media (prefers-reduced-motion: reduce){ .page{animation:none;} html{scroll-behavior:auto;} }
+
+  /* ---------- HERO / BOARDING PASS ---------- */
+  .hero-section{padding:56px 0 40px;}
+  .ticket{
+    display:grid; grid-template-columns: 1.5fr 1px 1fr;
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    overflow:visible; position:relative;
+  }
+  .ticket-main{padding:44px 40px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Space Mono'; font-size:.72rem; text-transform:uppercase; letter-spacing:.12em;
+    background:var(--paper-dim); padding:6px 12px; border-radius:999px; margin-bottom:18px;
+  }
+  .eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--nat);}
+  .hero-title{font-size:2.6rem; font-weight:700; max-width:14ch;}
+  .hero-title em{font-style:normal; color:var(--ling);}
+  .hero-desc{margin-top:16px; max-width:46ch; font-size:1.02rem;}
+  .hero-actions{margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;}
+  .btn{
+    border:none; padding:13px 22px; border-radius:999px; font-weight:600; font-size:.95rem;
+    display:inline-flex; align-items:center; gap:8px; transition:.2s;
+  }
+  .btn-primary{background:var(--ink); color:var(--paper);}
+  .btn-primary:hover{background:#2b2b38;}
+  .btn-ghost{background:transparent; color:var(--ink); border:2px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--ink);}
+
+  .ticket-divider{
+    position:relative; background:repeating-linear-gradient(to bottom, var(--line) 0 10px, transparent 10px 20px);
+  }
+  .ticket-divider::before, .ticket-divider::after{
+    content:''; position:absolute; left:50%; transform:translateX(-50%);
+    width:26px; height:26px; border-radius:50%; background:var(--paper);
+  }
+  .ticket-divider::before{top:-13px;}
+  .ticket-divider::after{bottom:-13px;}
+
+  .ticket-stub{padding:44px 34px; display:flex; flex-direction:column; gap:16px; justify-content:center;}
+  .stub-row{display:flex; justify-content:space-between; gap:10px;}
+  .stub-label{font-family:'Space Mono'; font-size:.65rem; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-soft);}
+  .stub-value{font-family:'Space Grotesk'; font-weight:700; font-size:1.4rem;}
+  .stub-value small{font-family:'Space Mono'; font-weight:400; font-size:.6rem; display:block; color:var(--ink-soft); text-transform:uppercase;}
+
+  @media (max-width:760px){
+    .ticket{grid-template-columns:1fr;}
+    .ticket-divider{height:2px; background:repeating-linear-gradient(to right, var(--line) 0 10px, transparent 10px 20px);}
+    .ticket-divider::before{top:50%; left:-13px; transform:translateY(-50%);}
+    .ticket-divider::after{bottom:auto; top:50%; left:auto; right:-13px; transform:translateY(-50%);}
+    .ticket-stub{flex-direction:row; flex-wrap:wrap;}
+    .hero-title{font-size:2rem;}
+  }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section{padding:52px 0;}
+  .section-head{display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:28px; flex-wrap:wrap;}
+  .section-head h2{font-size:1.7rem;}
+  .section-head p{margin:4px 0 0; max-width:52ch;}
+
+  /* ---------- STAMP BADGE / AREA COLORS ---------- */
+  .stamp{
+    font-family:'Space Mono'; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+    padding:6px 10px; border-radius:999px; border:1.5px dashed currentColor; display:inline-flex; align-items:center; gap:6px;
+  }
+  .area-ifa1{color:var(--ifa1); background:var(--ifa1-bg);}
+  .area-ifa2{color:var(--ifa2); background:var(--ifa2-bg);}
+
+  /* ---------- CARDS (postcard/ticket) ---------- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(255px,1fr)); gap:22px;}
+  .card{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    overflow:hidden; display:flex; flex-direction:column; cursor:pointer;
+    transition:transform .2s ease, box-shadow .2s ease; position:relative;
+  }
+  .card:hover{transform:translateY(-4px); box-shadow:0 18px 34px -14px rgba(20,20,28,.32);}
+  .card-media{position:relative; aspect-ratio:4/3; background:var(--paper-dim); overflow:hidden;}
+  .card-media img, .card-media video{width:100%; height:100%; object-fit:cover;}
+  .card-media .play{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(20,20,28,.28);
+  }
+  .card-media .play svg{width:46px; height:46px;}
+  .card-stamp{
+    position:absolute; top:10px; right:10px; transform:rotate(-6deg);
+    background:var(--paper); border-radius:50%; width:56px; height:56px;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    border:2px dashed currentColor; box-shadow:var(--shadow);
+    font-family:'Space Mono'; font-size:.52rem; font-weight:700; line-height:1.05; text-transform:uppercase;
+  }
+  .card-perforation{position:relative; height:0; margin:0 16px; border-top:2px dashed var(--line);}
+  .card-perforation::before, .card-perforation::after{
+    content:''; position:absolute; top:-9px; width:18px; height:18px; border-radius:50%; background:var(--paper);
+  }
+  .card-perforation::before{left:-25px;}
+  .card-perforation::after{right:-25px;}
+  .card-body{padding:16px; display:flex; flex-direction:column; gap:6px; flex:1;}
+  .card-body h3{font-size:1.02rem;}
+  .card-meta{font-family:'Space Mono'; font-size:.68rem; color:var(--ink-soft); display:flex; gap:8px; flex-wrap:wrap;}
+  .card-desc{font-size:.86rem; margin:0; color:var(--ink-soft); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+
+  /* ---------- DESTAQUES STRIP ---------- */
+  .destaques-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(255px,1fr)); gap:22px;}
+
+  /* ---------- COMO FUNCIONA ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .step{background:var(--card); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);}
+  .step .num{font-family:'Space Mono'; font-size:.75rem; color:var(--ink-soft);}
+  .step h3{margin-top:10px; font-size:1.05rem;}
+  .step p{font-size:.9rem; margin-top:8px;}
+  @media (max-width:760px){.steps{grid-template-columns:1fr;}}
+
+  /* ---------- FILTER BAR ---------- */
+  .filter-bar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:26px;
+    background:var(--card); padding:14px; border-radius:var(--radius); box-shadow:var(--shadow);
+  }
+  .chip{
+    border:1.5px solid var(--line); background:transparent; padding:8px 14px; border-radius:999px;
+    font-size:.84rem; font-weight:600; color:var(--ink-soft); transition:.15s;
+  }
+  .chip.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .search-input{
+    margin-left:auto; border:1.5px solid var(--line); border-radius:999px; padding:9px 16px;
+    font-family:inherit; font-size:.88rem; min-width:200px; background:var(--paper);
+  }
+  .empty-state{text-align:center; padding:60px 20px; color:var(--ink-soft);}
+  .empty-state h3{font-family:'Space Grotesk'; color:var(--ink); margin-bottom:8px;}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,20,28,.72); backdrop-filter:blur(2px);
+    display:none; align-items:center; justify-content:center; z-index:200; padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--card); border-radius:var(--radius); max-width:820px; width:100%;
+    max-height:88vh; overflow-y:auto; box-shadow:var(--shadow); position:relative;
+  }
+  .modal-close{
+    position:absolute; top:14px; right:14px; background:var(--ink); color:var(--paper);
+    border:none; width:36px; height:36px; border-radius:50%; font-size:1.1rem; z-index:2;
+  }
+  .modal-media{width:100%; aspect-ratio:16/9; background:#000;}
+  .modal-media img, .modal-media video{width:100%; height:100%; object-fit:contain; background:#000;}
+  .modal-body{padding:26px 30px 30px;}
+  .modal-body h2{font-size:1.4rem; margin-bottom:10px;}
+  .modal-meta{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;}
+  .modal-meta .tag{font-family:'Space Mono'; font-size:.7rem; background:var(--paper-dim); padding:5px 10px; border-radius:999px;}
+
+  /* ---------- FORM ---------- */
+  .form-wrap{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:36px; max-width:720px; margin:0 auto;
+  }
+  .field{margin-bottom:18px; display:flex; flex-direction:column; gap:6px;}
+  .field label{font-family:'Space Mono'; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);}
+  .field input, .field select, .field textarea{
+    font-family:inherit; font-size:.95rem; padding:12px 14px; border-radius:10px;
+    border:1.5px solid var(--line); background:var(--paper); color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--ink); outline-offset:1px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:600px){.field-row{grid-template-columns:1fr;} .form-wrap{padding:24px;}}
+  .file-drop{
+    border:2px dashed var(--line); border-radius:12px; padding:26px; text-align:center;
+    background:var(--paper-dim); font-size:.88rem; color:var(--ink-soft); cursor:pointer;
+  }
+  .file-drop.filled{border-color:var(--nat); color:var(--ink);}
+  .helptext{font-size:.78rem; color:var(--ink-soft); margin-top:4px;}
+  .form-actions{margin-top:8px;}
+
+  /* ---------- TOAST ---------- */
+  #toast-container{position:fixed; bottom:22px; right:22px; z-index:300; display:flex; flex-direction:column; gap:10px;}
+  .toast{
+    background:var(--ink); color:var(--paper); padding:14px 18px; border-radius:12px;
+    box-shadow:var(--shadow); font-size:.88rem; display:flex; align-items:center; gap:10px;
+    animation:toastIn .25s ease;
+  }
+  .toast .dot{width:8px; height:8px; border-radius:50%; background:var(--nat); flex:none;}
+  @keyframes toastIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:36px; align-items:start;}
+  @media (max-width:800px){.about-grid{grid-template-columns:1fr;}}
+  .about-card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px;}
+  .area-list{display:flex; flex-direction:column; gap:12px; margin-top:14px;}
+  .area-list li{list-style:none; display:flex; align-items:center; gap:10px; font-size:.92rem;}
+  .swatch{width:14px; height:14px; border-radius:4px; flex:none;}
+
+  footer{background:var(--ink); color:var(--paper); padding:34px 0; margin-top:20px;}
+  .footer-inner{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; align-items:center;}
+  .footer-inner p{color:rgba(250,247,239,.6); font-size:.82rem; margin:0;}
+
+  .visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <div class="logo" onclick="goTo('inicio')">
+      <div class="logo-badge"></div>
+      <div>
+        <div class="logo-text">Vitrine<span>.</span></div>
+        <div class="logo-sub">Colégio Estadual Duque de Caxias</div>
+      </div>
+    </div>
+    <button class="burger" id="burgerBtn" aria-label="Abrir menu">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <button data-page="inicio" onclick="goTo('inicio')">Início</button>
+      <button data-page="galeria" onclick="goTo('galeria')">Galeria</button>
+      <button data-page="sobre" onclick="goTo('sobre')">Sobre</button>
+      <button data-page="enviar" class="nav-cta" onclick="goTo('enviar')">Enviar trabalho</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ===================== PÁGINA: INÍCIO ===================== -->
+  <section class="page active" id="page-inicio">
+    <div class="hero-section">
+      <div class="ticket">
+        <div class="ticket-main">
+          <div class="eyebrow"><span class="dot"></span> Colégio Estadual Duque de Caxias · Mostra dos IFAs</div>
+          <h1 class="hero-title">O trabalho da turma merece <em>vitrine</em>, não gaveta.</h1>
+          <p class="hero-desc">Publique fotos e vídeos dos projetos do seu IFA e veja o que as outras turmas do Colégio Estadual Duque de Caxias estão produzindo nos dois Itinerários Formativos de Aprofundamento.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="goTo('galeria')">Explorar a galeria →</button>
+            <button class="btn btn-ghost" onclick="goTo('enviar')">Enviar meu trabalho</button>
+          </div>
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-stub">
+          <div class="stub-row">
+            <div>
+              <div class="stub-label">Trabalhos</div>
+              <div class="stub-value" id="statTotal">—</div>
+            </div>
+            <div>
+              <div class="stub-label">IFAs</div>
+              <div class="stub-value">02</div>
+            </div>
+          </div>
+          <div class="stub-row">
+            <div>
+              <div class="stub-label">Turmas ativas</div>
+              <div class="stub-value" id="statTurmas">—</div>
+            </div>
+            <div>
+              <div class="stub-label">Status</div>
+              <div class="stub-value" style="color:var(--nat)">Aberta</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <h2>Destaques da semana</h2>
+          <p>Uma seleção dos trabalhos mais recentes publicados pelas turmas.</p>
+        </div>
+        <button class="btn btn-ghost" onclick="goTo('galeria')">Ver galeria completa</button>
+      </div>
+      <div class="destaques-grid" id="destaquesGrid"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <h2>Como funciona</h2>
+          <p>Do projeto de sala até a vitrine, em três passos.</p>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num mono">01</div>
+          <h3>Finalize o trabalho</h3>
+          <p>Feche a foto, o vídeo ou o registro do projeto do seu itinerário com o professor responsável.</p>
+        </div>
+        <div class="step">
+          <div class="num mono">02</div>
+          <h3>Preencha o envio</h3>
+          <p>Use o formulário de envio com os dados da turma, matéria e uma descrição curta do trabalho.</p>
+        </div>
+        <div class="step">
+          <div class="num mono">03</div>
+          <h3>Apareça na vitrine</h3>
+          <p>Após a validação, o trabalho entra na galeria pública, filtrável por itinerário e matéria.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PÁGINA: GALERIA ===================== -->
+  <section class="page" id="page-galeria">
+    <div class="section" style="padding-top:40px;">
+      <div class="section-head">
+        <div>
+          <h2>Galeria dos itinerários</h2>
+          <p>Filtre por área para ver os trabalhos publicados pelas turmas.</p>
+        </div>
+      </div>
+
+      <div class="filter-bar" id="filterBar">
+        <button class="chip active" data-filter="todos">Todos</button>
+        <button class="chip" data-filter="ifa_lgg_chs">IFA LGG/CHS</button>
+        <button class="chip" data-filter="ifa_mat_cnt">IFA MAT/CNT</button>
+        <input class="search-input" id="searchInput" type="text" placeholder="Buscar por título, turma ou aluno…">
+      </div>
+
+      <div class="grid" id="galleryGrid"></div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <h3>Nenhum trabalho encontrado</h3>
+        <p>Tente outro filtro ou outro termo de busca.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PÁGINA: ENVIAR TRABALHO ===================== -->
+  <section class="page" id="page-enviar">
+    <div class="section" style="padding-top:40px;">
+      <div class="section-head" style="justify-content:center; text-align:center; flex-direction:column;">
+        <h2>Enviar trabalho</h2>
+        <p style="margin:8px auto 0;">Preencha os campos abaixo para publicar seu projeto na vitrine. Um professor revisa antes da publicação final.</p>
+      </div>
+
+      <form class="form-wrap" id="uploadForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="fNome">Nome do aluno</label>
+            <input type="text" id="fNome" placeholder="Ex: Maria Silva" required>
+          </div>
+          <div class="field">
+            <label for="fTurma">Turma</label>
+            <input type="text" id="fTurma" placeholder="Ex: 2º B" required>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="fItinerario">Itinerário formativo</label>
+            <select id="fItinerario" required>
+              <option value="">Selecione…</option>
+              <option value="ifa_lgg_chs">IFA LGG/CHS — Linguagens, Ciências Humanas e Sociais Aplicadas</option>
+              <option value="ifa_mat_cnt">IFA MAT/CNT — Matemática e Ciências da Natureza</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fMateria">Matéria / componente</label>
+            <input type="text" id="fMateria" placeholder="Ex: Produção Textual" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="fTitulo">Título do trabalho</label>
+          <input type="text" id="fTitulo" placeholder="Ex: Curta-metragem sobre migração urbana" required>
+        </div>
+
+        <div class="field">
+          <label for="fDescricao">Descrição</label>
+          <textarea id="fDescricao" rows="4" placeholder="Conte brevemente do que se trata o projeto…" required></textarea>
+        </div>
+
+        <div class="field">
+          <label for="fArquivo">Upload de arquivo ou link</label>
+          <div class="file-drop" id="fileDrop" onclick="document.getElementById('fArquivo').click()">
+            📎 Clique para simular o upload de uma foto/vídeo — ou cole um link abaixo
+          </div>
+          <input type="file" id="fArquivo" class="visually-hidden" accept="image/*,video/*">
+          <input type="text" id="fLink" placeholder="Ou cole aqui o link do Drive / YouTube (opcional)" style="margin-top:10px;">
+          <p class="helptext">Neste protótipo o upload é simulado: o arquivo não sai do seu navegador.</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Publicar na vitrine</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== PÁGINA: SOBRE ===================== -->
+  <section class="page" id="page-sobre">
+    <div class="section" style="padding-top:40px;">
+      <div class="section-head">
+        <div>
+          <h2>Sobre a Vitrine</h2>
+          <p>Um espaço para os itinerários formativos ganharem visibilidade.</p>
+        </div>
+      </div>
+      <div class="about-grid">
+        <div class="about-card">
+          <h3>O que é este site</h3>
+          <p style="margin-top:10px;">A Vitrine é a plataforma do Colégio Estadual Duque de Caxias para reunir, em um só lugar, os trabalhos produzidos nos IFAs — Itinerários Formativos de Aprofundamento. A ideia é simples: o que é produzido em sala não precisa ficar restrito a ela — pode ser visto, comentado e servir de referência para outras turmas.</p>
+          <p>Cada trabalho publicado passa por revisão de um professor responsável antes de entrar na galeria pública, garantindo que o conteúdo esteja de acordo com as diretrizes da escola.</p>
+        </div>
+        <div class="about-card">
+          <h3>Os dois IFAs</h3>
+          <ul class="area-list">
+            <li><span class="swatch" style="background:var(--ifa1)"></span> IFA LGG/CHS — Aprofundamento em Linguagens, Ciências Humanas e Sociais Aplicadas</li>
+            <li><span class="swatch" style="background:var(--ifa2)"></span> IFA MAT/CNT — Aprofundamento em Matemática e Ciências da Natureza</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <p>Vitrine — Mostra dos IFAs · Colégio Estadual Duque de Caxias © 2026</p>
+    <p>Um projeto de e para os estudantes do Colégio Estadual Duque de Caxias.</p>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()" aria-label="Fechar">✕</button>
+    <div class="modal-media" id="modalMedia"></div>
+    <div class="modal-body">
+      <span class="stamp" id="modalStamp"></span>
+      <h2 id="modalTitle" style="margin-top:12px;"></h2>
+      <p id="modalDesc"></p>
+      <div class="modal-meta" id="modalMeta"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+  // ---------- DADOS (em memória — trocar por API/planilha real depois) ----------
+  const AREAS = {
+    ifa_lgg_chs: {label:"IFA LGG/CHS", full:"Itinerário Formativo de Aprofundamento em Linguagens, Ciências Humanas e Sociais Aplicadas", color:"var(--ifa1)", cls:"area-ifa1"},
+    ifa_mat_cnt: {label:"IFA MAT/CNT", full:"Itinerário Formativo de Aprofundamento em Matemática e Ciências da Natureza", color:"var(--ifa2)", cls:"area-ifa2"}
+  };
+
+  let works = [
+    {id:1, area:"ifa_mat_cnt", tipo:"foto", titulo:"Rampas acessíveis: cálculo de inclinação e movimento", aluno:"Nome do aluno", turma:"3º A", materia:"Matemática Aplicada e Biomecânica", desc:"Projeto do IFA MAT/CNT que calcula o ângulo de inclinação ideal para rampas de acessibilidade e analisa, com conceitos de física do movimento, o esforço biomecânico de quem as utiliza.", midia:"https://picsum.photos/seed/acessibilidademov/600/450", destaque:true}
+  ];
+
+  let currentFilter = "todos";
+  let currentSearch = "";
+
+  // ---------- NAVEGAÇÃO ----------
+  function goTo(page){
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById("page-" + page).classList.add("active");
+    document.querySelectorAll(".nav-links button").forEach(b => b.classList.toggle("active", b.dataset.page === page));
+    document.getElementById("navLinks").classList.remove("open");
+    window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+  }
+  document.getElementById("burgerBtn").addEventListener("click", () => {
+    document.getElementById("navLinks").classList.toggle("open");
+  });
+
+  // ---------- RENDERIZAÇÃO DE CARDS ----------
+  function stampInitials(area){
+    return AREAS[area].label.replace("IFA ", "");
+  }
+
+  function cardHTML(item){
+    const a = AREAS[item.area];
+    const mediaInner = item.tipo === "video"
+      ? `<img src="https://picsum.photos/seed/${item.id}thumb/600/450" alt=""><div class="play"><svg viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="11" fill="rgba(20,20,28,.55)"/><polygon points="10,8 16,12 10,16" fill="white"/></svg></div>`
+      : `<img src="${item.midia}" alt="${item.titulo}">`;
+    return `
+      <article class="card" onclick="openModal(${item.id})">
+        <div class="card-media">
+          ${mediaInner}
+          <div class="card-stamp ${a.cls}" style="color:${a.color}">${stampInitials(item.area)}</div>
+        </div>
+        <div class="card-perforation"></div>
+        <div class="card-body">
+          <span class="stamp ${a.cls}">${a.label}</span>
+          <h3>${item.titulo}</h3>
+          <div class="card-meta">
+            <span>${item.aluno}</span>·<span>${item.turma}</span>·<span>${item.materia}</span>
+          </div>
+          <p class="card-desc">${item.desc}</p>
+        </div>
+      </article>`;
+  }
+
+  function renderGallery(){
+    const grid = document.getElementById("galleryGrid");
+    const empty = document.getElementById("emptyState");
+    const term = currentSearch.trim().toLowerCase();
+    const filtered = works.filter(w => {
+      const matchArea = currentFilter === "todos" || w.area === currentFilter;
+      const matchSearch = !term || [w.titulo, w.aluno, w.turma, w.materia].join(" ").toLowerCase().includes(term);
+      return matchArea && matchSearch;
+    });
+    grid.innerHTML = filtered.map(cardHTML).join("");
+    empty.style.display = filtered.length ? "none" : "block";
+  }
+
+  function renderDestaques(){
+    const grid = document.getElementById("destaquesGrid");
+    const destaques = works.filter(w => w.destaque).slice(0,4);
+    grid.innerHTML = destaques.map(cardHTML).join("");
+  }
+
+  function renderStats(){
+    document.getElementById("statTotal").textContent = String(works.length).padStart(2,"0");
+    const turmas = new Set(works.map(w=>w.turma));
+    document.getElementById("statTurmas").textContent = String(turmas.size).padStart(2,"0");
+  }
+
+  // ---------- FILTROS ----------
+  document.getElementById("filterBar").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if(!chip) return;
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    currentFilter = chip.dataset.filter;
+    renderGallery();
+  });
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    currentSearch = e.target.value;
+    renderGallery();
+  });
+
+  // ---------- MODAL ----------
+  function openModal(id){
+    const item = works.find(w => w.id === id);
+    if(!item) return;
+    const a = AREAS[item.area];
+    document.getElementById("modalMedia").innerHTML = item.tipo === "video"
+      ? `<video src="${item.midia}" controls autoplay></video>`
+      : `<img src="${item.midia}" alt="${item.titulo}">`;
+    document.getElementById("modalStamp").className = "stamp " + a.cls;
+    document.getElementById("modalStamp").textContent = a.full;
+    document.getElementById("modalTitle").textContent = item.titulo;
+    document.getElementById("modalDesc").textContent = item.desc;
+    document.getElementById("modalMeta").innerHTML = `
+      <span class="tag">👤 ${item.aluno}</span>
+      <span class="tag">🏷 ${item.turma}</span>
+      <span class="tag">📘 ${item.materia}</span>`;
+    document.getElementById("modalOverlay").classList.add("open");
+  }
+  function closeModal(){
+    document.getElementById("modalOverlay").classList.remove("open");
+    document.getElementById("modalMedia").innerHTML = "";
+  }
+  document.getElementById("modalOverlay").addEventListener("click", (e) => {
+    if(e.target.id === "modalOverlay") closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape") closeModal();
+  });
+
+  // ---------- UPLOAD SIMULADO ----------
+  const fileInput = document.getElementById("fArquivo");
+  fileInput.addEventListener("change", () => {
+    const drop = document.getElementById("fileDrop");
+    if(fileInput.files.length){
+      drop.textContent = "✅ Arquivo selecionado: " + fileInput.files[0].name;
+      drop.classList.add("filled");
+    }
+  });
+
+  function showToast(msg){
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerHTML = `<span class="dot"></span> ${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4200);
+  }
+
+  document.getElementById("uploadForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const area = document.getElementById("fItinerario").value;
+    const novo = {
+      id: Date.now(),
+      area: area,
+      tipo: fileInput.files.length && fileInput.files[0].type.startsWith("video") ? "video" : "foto",
+      titulo: document.getElementById("fTitulo").value,
+      aluno: document.getElementById("fNome").value,
+      turma: document.getElementById("fTurma").value,
+      materia: document.getElementById("fMateria").value,
+      desc: document.getElementById("fDescricao").value,
+      midia: `https://picsum.photos/seed/${Date.now()}/600/450`,
+      destaque: false
+    };
+    works.unshift(novo);
+    renderGallery();
+    renderDestaques();
+    renderStats();
+    showToast("Trabalho enviado para revisão. Assim que aprovado, ele aparece na galeria.");
+    e.target.reset();
+    document.getElementById("fileDrop").textContent = "📎 Clique para simular o upload de uma foto/vídeo — ou cole um link abaixo";
+    document.getElementById("fileDrop").classList.remove("filled");
+    setTimeout(() => goTo("galeria"), 900);
+  });
+
+  // ---------- INICIALIZAÇÃO ----------
+  renderGallery();
+  renderDestaques();
+  renderStats();
+</script>
+
+</body>
+</html>
